@@ -1,0 +1,52 @@
+iron ctf
+JWT Hunt
+Points: 448
+
+
+Apologies for the lack of a polished write-up and no images either. The main 
+focus is for people who just want to know what was the solution
+
+First, I accessed the site, registered, logged in, and received a JWT.
+
+I tested all the known JWT implementation vulnerabilities relevant to the data (no kid or smth, symmetric alg etc..)
+to try and log in as the admin, but none of these worked.
+
+I was a little disappointed that it wasn't another jwt implementation vulnerabilities challenge
+because I've already done tons of these and thought this would be cooler lol. at least it's worth 448 points
+
+
+I then found the  "secret key part 2" cookie i got , and attempted a dictionary attack using a python script and the 
+"rockyou.txt" wordlist to brute force the first part of the secret key, hoping to discover the entire key. Unfortunately, this approach didn’t work.
+
+
+next, I began searching the site for any hidden information. I attempted to access /admin, which redirected
+me to /not_admin. I checked for any information during the redirect but found nothing. 
+I also tried variations like /yes_admin, but they all returned 404 errors. After searching through all the available pages for any hidden files or data, I still found nothing.
+
+I then thought to check /robots.txt. Success! This revealed the first part of the secret key and determined :
+
+User-agent: *
+Disallow: /secretkeypart4
+
+(no user agents were allowed to access this path)
+
+
+I wondered what would happen if I modified/delete the user-agent header. Unfortunately, that didn't work.
+I then tried sending a POST request, but it was also unsuccessful. Finally, after
+testing with "OPTIONS",I decided to try using "HEAD" while deleting the User-Agent header. 
+That worked and gave me the fourth part of the secret.
+
+To find the third part of the secret key, I initially tried other common paths similar to /robots.txt,
+such as .git, .svn, .DS_Store, .htaccess, package.json, crossdomain.xml etc.. but none yielded results.
+After several hours of trying different approaches, I went back to information leakage techniques and remembered 
+that there were many more examples like the ones I mentioned and I simply asked chat gpt to list them
+I tried sitemap.xml and Success !
+ put them all together: 6yH$#v9Wq3e&Zf8LpRt1%Y4nJ^aPk7Sd2C@mQjUwEbGoIhNy0T!BxlVz5uMKA#Yp
+ 
+Using this, I was able to create a new admin token with the jwt.io website and successfully log in as admin.
+
+"Welcome admin, here's your flag : ironCTF{W0w_U_R34lly_Kn0w_4_L07_Ab0ut_JWT_3xp10r4710n!}"
+
+that was kinda easy and fun
+have a great day 333
+
